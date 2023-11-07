@@ -1,4 +1,5 @@
 from datetime import timedelta
+import numpy as np
 def momentum_score(item, calc_date):
     back_date = {}
     scores = {}

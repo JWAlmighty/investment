@@ -1,3 +1,6 @@
+import yfinance as yf
+import numpy as np
+
 def Buy(asset, portfolio_item, ratio, start_date, end_date, commission=0.002):
     portfolio_dict = {}
     buying_price = {}

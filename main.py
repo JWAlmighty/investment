@@ -10,15 +10,11 @@ from datetime import timedelta
 import yfinance as yf
 import pandas as pd
 
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press ⌘F8 to toggle the breakpoint.
-
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     # 공격형
-    start_date = "2004-01-01"
+    start_date = "2020-01-01"
     end_date = "2023-11-05"
     ticker = yf.Ticker("SPY")  # 미국 주식
     spy = ticker.history(start=start_date, end=end_date)
@@ -41,8 +37,7 @@ if __name__ == '__main__':
 
     ticker = yf.Ticker("SHY")  # 미국 단기 국채
     shy = ticker.history(start=start_date, end=end_date)
-
-    # print_hi('PyCharm')
+    # print("Done")
     rebalance_day = shy.index[0] + timedelta(days=30)
     backtesting = {}
     remain = 10000
@@ -71,6 +66,7 @@ if __name__ == '__main__':
                 strategy = 1
         if strategy == 1:
             item = item_aggressive[np.argmax(scores_tmp[:4])]
+            print(item)
             _, portfolio_dict, _, buying_vol, _, remain = Buy(asset=remain, portfolio_item=[item], ratio=[1],
                                                               start_date=rebalance_day.isoformat()[:10],
                                                               end_date=(rebalance_day + timedelta(days=30)).isoformat()[
@@ -97,5 +93,6 @@ if __name__ == '__main__':
     tmp = pd.DataFrame.from_dict(backtesting, orient='index',
                                  columns=['SPY', 'EFA', 'EEM', 'AGG', 'LQD', 'IEF', 'SHY', 'Strategy', 'Remain',
                                           'Price', 'Volume'])
-    tmp
+
+    tmp.to_csv('tmp.csv')
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/
