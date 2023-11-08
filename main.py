@@ -9,13 +9,19 @@ import numpy as np
 from datetime import timedelta
 import yfinance as yf
 import pandas as pd
+import quantstats as qs
+from matplotlib import pyplot as plt
+
 
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     # 공격형
-    start_date = "2020-01-01"
+    prev_item = 'default'
+    start_date = "2004-01-01"
     end_date = "2023-11-05"
+    # start_date = "2011-04-24"
+    # end_date = "2011-07-30"
     ticker = yf.Ticker("SPY")  # 미국 주식
     spy = ticker.history(start=start_date, end=end_date)
 
@@ -66,19 +72,35 @@ if __name__ == '__main__':
                 strategy = 1
         if strategy == 1:
             item = item_aggressive[np.argmax(scores_tmp[:4])]
-            print(item)
-            _, portfolio_dict, _, buying_vol, _, remain = Buy(asset=remain, portfolio_item=[item], ratio=[1],
-                                                              start_date=rebalance_day.isoformat()[:10],
-                                                              end_date=(rebalance_day + timedelta(days=30)).isoformat()[
-                                                                       :10], commission=0.002)
-            remain, sell_price = SellAll(portfolio_dict, item, buying_vol, remain)
+            # print(item)
+            if item == prev_item:
+                _, portfolio_dict, _, buying_vol, _, remain = Buy(asset=remain, portfolio_item=[item], ratio=[1],
+                                                                  start_date=rebalance_day.isoformat()[:10],
+                                                                  end_date=(rebalance_day + timedelta(days=30)).isoformat()[
+                                                                           :10], commission=0)
+                remain, sell_price = SellAll(portfolio_dict, item, buying_vol, remain, commission=0)
+            else:
+                _, portfolio_dict, _, buying_vol, _, remain = Buy(asset=remain, portfolio_item=[item], ratio=[1],
+                                                                  start_date=rebalance_day.isoformat()[:10],
+                                                                  end_date=(rebalance_day + timedelta(days=30)).isoformat()[
+                                                                           :10], commission=0.002)
+                remain, sell_price = SellAll(portfolio_dict, item, buying_vol, remain)
+            prev_item = item
         else:
             item = item_safe[np.argmax(scores_tmp[4:])]
-            _, portfolio_dict, _, buying_vol, _, remain = Buy(asset=remain, portfolio_item=[item], ratio=[1],
-                                                              start_date=rebalance_day.isoformat()[:10],
-                                                              end_date=(rebalance_day + timedelta(days=30)).isoformat()[
-                                                                       :10], commission=0.002)
-            remain, sell_price = SellAll(portfolio_dict, item, buying_vol, remain)
+            if item == prev_item:
+                _, portfolio_dict, _, buying_vol, _, remain = Buy(asset=remain, portfolio_item=[item], ratio=[1],
+                                                                  start_date=rebalance_day.isoformat()[:10],
+                                                                  end_date=(rebalance_day + timedelta(days=30)).isoformat()[
+                                                                           :10], commission=0)
+                remain, sell_price = SellAll(portfolio_dict, item, buying_vol, remain, commission=0)
+            else:
+                _, portfolio_dict, _, buying_vol, _, remain = Buy(asset=remain, portfolio_item=[item], ratio=[1],
+                                                                  start_date=rebalance_day.isoformat()[:10],
+                                                                  end_date=(rebalance_day + timedelta(days=30)).isoformat()[
+                                                                           :10], commission=0.002)
+                remain, sell_price = SellAll(portfolio_dict, item, buying_vol, remain)
+            prev_item = item
 
         volume = buying_vol
         scores_tmp.append(strategy)
@@ -95,4 +117,9 @@ if __name__ == '__main__':
                                           'Price', 'Volume'])
 
     tmp.to_csv('tmp.csv')
+    qs.reports.basic(tmp['Remain'])
+    plt.plot(tmp.index, tmp['Remain'])
+    # plt.plot(tmp.index, ief['Close'])
+    plt.title("Remain")
+    plt.show()
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/
